@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+UI-Kopie.py
+MainBackup.py
+UIBackup.py
+cache.json
+data.json
