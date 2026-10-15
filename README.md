@@ -74,7 +74,7 @@ Create a `.env` file in the project folder:
 
 ```
 WEATHER_API_KEY=https://api.open-meteo.com/v1/forecast
-IP_API_KEY=<IP geolocation API URL>
+IP_API_KEY=https://ipwho.is/
 ```
 
 Run the app:
