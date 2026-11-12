@@ -2,24 +2,24 @@ from PyQt6.QtCore import Qt, QTimer,QPropertyAnimation, QEasingCurve, QSize,QPoi
 from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow, QPushButton, QGraphicsOpacityEffect
 from PyQt6.QtGui import QPixmap, QMovie, QFont
 from PyQt6.QtWidgets import QLabel
-import sys, Main
+import sys, weather
 
 app = QApplication(sys.argv)
 
-class UI(QWidget):  #UI erbt von QWidget
+class UI(QWidget):  # UI inherits from QWidget
     def __init__(self):
-        super().__init__()# QWidget initialisieren
-        self.wetter = Main.Weather()
-        self.wetter.start_weather(on_update=self.on_data_ready)
-        self.current_temp = self.wetter.data["current"]["temperature_2m"]
+        super().__init__() # initialize QWidget
+        self.weather = weather.Weather()
+        self.weather.start_weather(on_update=self.on_data_ready)
+        self.current_temp = self.weather.data["current"]["temperature_2m"]
         self.current_code = None
         self.movie = None
         self.temp = self.current_temp
-        #------------- Timer für Mausevent
+        #------------- Timer for mouse events
         self.timer_m = QTimer()
-        self.timer_m.timeout.connect(self.maus_pruefen)
-        self.timer_m.start(100)  # alle 100ms klingeln
-        #------------- Parent-Fenster anpassung
+        self.timer_m.timeout.connect(self.check_mouse)
+        self.timer_m.start(100)  # fires every 100 ms
+        #------------- Window setup
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setStyleSheet("background: transparent")
@@ -31,41 +31,41 @@ class UI(QWidget):  #UI erbt von QWidget
         self.button.setStyleSheet("background: rgba(220,0,0,150);border-radius: 10px; color: white;font-size: 15px;")
         self.button.clicked.connect(self.close)
         self.button.hide()
-        #--------------°C Anzeige
-        self.gradcelsius = QLabel(self)
-        self.gradcelsius.setStyleSheet("background: transparent")
-        self.gradcelsius.setFont(QFont('Times', 12, QFont.Weight.Bold))
-        self.gradcelsius.setText(f"{self.temp}°C")
-        self.gradcelsius.move(110,180)
+        #-------------- °C display
+        self.temp_label = QLabel(self)
+        self.temp_label.setStyleSheet("background: transparent")
+        self.temp_label.setFont(QFont('Times', 12, QFont.Weight.Bold))
+        self.temp_label.setText(f"{self.temp}°C")
+        self.temp_label.move(110,180)
         #---------------
         self.imagelabel = QLabel(self)
         self.imagelabel.setScaledContents(True)
         self.imagelabel.setFixedSize(256, 256)
         self.weather_update()
-        #-------------- Timer zum aktualisieren der Sprites
+        #-------------- Timer for updating the sprites
         timer_s = QTimer()
         timer_s.timeout.connect(self.weather_update)
         timer_s.start(60000)
-        #------------- Timer zum aktualisieren der Temperatur
+        #------------- Timer for updating the temperature
         self.temp_update_timer = QTimer()
         self.temp_update_timer.timeout.connect(self.temp_update)
         self.temp_update_timer.start(30000)
-        #------------- Timer zum aktualisieren der Temperaturanimation
+        #------------- Timer for the temperature animation
         self.temp_timer = QTimer()
         self.temp_timer.timeout.connect(self.count_temp)
         self.temp_update()
-        #------------- 30 Minuten Timer zur aktualisierung
+        #------------- Timer for refreshing the weather data (every 2 minutes)
         self.refresh_timer = QTimer()
         self.refresh_timer.timeout.connect(self.api_refresh)
         self.refresh_timer.start(2 * 60 * 1000)
 
-        # #------------ ZUM TESTEN
+        # #------------ FOR TESTING
         # self.test_codes = ["sun", "cloud", "rain", "night", "snow", "thunder", "fog"]
         # self.test_index = 0
         #
         # self.test_timer = QTimer()
         # self.test_timer.timeout.connect(self.test_switch)
-        # self.test_timer.start(3000)  # alle 3 Sekunden wechseln
+        # self.test_timer.start(3000)  # switch every 3 seconds
         # #--------------------
 
 
@@ -91,7 +91,7 @@ class UI(QWidget):  #UI erbt von QWidget
             if self.movie:
                 self.movie.stop()
             self.movie = QMovie(new_movie_path)
-            # Altes Movie stoppen, neues laden
+            # Stop old movie, load new one
             self.movie.stop()
             self.movie = QMovie(new_movie_path)
             self.imagelabel.setMovie(self.movie)
@@ -111,35 +111,35 @@ class UI(QWidget):  #UI erbt von QWidget
     def change_sprite(self):
         if self.current_code == "night":
             self.button.move(220, 13)
-            self.gradcelsius.move(100, 220)
+            self.temp_label.move(100, 220)
             return "sprite/NightSprite.gif"
         elif self.current_code == "cloud":
             self.button.move(220, 13)
-            self.gradcelsius.move(110, 180)
+            self.temp_label.move(110, 180)
             return "sprite/CloudSprite.gif"
         elif self.current_code == "sun":
             self.button.move(220, 13)
-            self.gradcelsius.move(100,250)
+            self.temp_label.move(100,250)
             return "sprite/SunSprite.gif"
         elif self.current_code == "rain":
-            self.gradcelsius.move(110, 11)
+            self.temp_label.move(110, 11)
             self.button.move(260, 7)
             return "sprite/RainSprite.gif"
         elif self.current_code == "fog":
-            self.gradcelsius.move(110, 11)
+            self.temp_label.move(110, 11)
             self.button.move(230, 13)
             return "sprite/FogSprite.gif"
         elif self.current_code == "snow":
-            self.gradcelsius.move(120, 10)
+            self.temp_label.move(120, 10)
             self.button.move(220, 13)
             return "sprite/SnowSprite.gif"
         elif self.current_code == "thunder":
-            self.gradcelsius.move(110, 11)
+            self.temp_label.move(110, 11)
             self.button.move(220, 13)
             return "sprite/ThunderSprite.gif"
 
     def weather_update(self):
-        new_code = self.wetter.weather_code()
+        new_code = self.weather.weather_code()
         #new_code = "cloud"
 
         if new_code != self.current_code:
@@ -148,7 +148,7 @@ class UI(QWidget):  #UI erbt von QWidget
             self.animation(path)
 
     def temp_update(self):
-        self.target_temp = self.wetter.get_temperature()
+        self.target_temp = self.weather.get_temperature()
         self.temp_timer.start(30)
 
     def count_temp(self):
@@ -157,24 +157,24 @@ class UI(QWidget):  #UI erbt von QWidget
         elif self.current_temp > self.target_temp:
             self.current_temp = round(self.current_temp - 0.1,1)
         else:
-            self.temp_timer.stop()  # Ziel erreicht
+            self.temp_timer.stop()  # target reached
             return
 
-        self.gradcelsius.setText(f"{self.current_temp}°C")
+        self.temp_label.setText(f"{self.current_temp}°C")
 
     def on_data_ready(self):
-        #Wenn API-Thread fertig ist
+        # Called when the API thread is done
         QTimer.singleShot(0, self.weather_update)
         QTimer.singleShot(0, self.temp_update)
 
     def api_refresh(self):
-        self.wetter.refresh(on_update=self.on_data_ready)
+        self.weather.refresh(on_update=self.on_data_ready)
 
-    # #--------------ZUM TESTEN
+    # #-------------- FOR TESTING
     # def test_switch(self):
     #     self.test_index = (self.test_index + 1) % len(self.test_codes)
-    #     self.current_code = None  # damit weather_update den Wechsel erkennt
-    #     # direkt den nächsten Code setzen
+    #     self.current_code = None  # so weather_update detects the change
+    #     # set the next code directly
     #     new_code = self.test_codes[self.test_index]
     #     self.current_code = new_code
     #     path = self.change_sprite()
@@ -186,7 +186,7 @@ class UI(QWidget):  #UI erbt von QWidget
         self.button.show()
         self.button.raise_()
 
-    def maus_pruefen(self):
+    def check_mouse(self):
         if not self.rect().contains(self.mapFromGlobal(self.cursor().pos())):
             self.button.hide()
 

@@ -28,9 +28,9 @@ class Weather:
 
     def start_weather(self, on_update=None):
         try:
-            with open("data.json", "r") as datei:
-                self.data = json.load(datei)
-            print("Json geladen")
+            with open("data.json", "r") as file:
+                self.data = json.load(file)
+            print("JSON loaded")
         except FileNotFoundError:
             self.data = {
                 "current": {
@@ -48,20 +48,20 @@ class Weather:
             self.params = {"latitude": self.location["latitude"],
                            "longitude": self.location["longitude"],
                            "current": "temperature_2m,weather_code,is_day"}
-            print("location geladen")
+            print("Location loaded")
         except Exception as e:
-            print(f"Location-Fehler: {e}")
+            print(f"Location error: {e}")
 
         self.get_weather_data(on_update)
 
     def get_weather_data(self, on_update=None):
         try:
             self.data = requests.get(self.url_weather, params=self.params,timeout=5).json()
-            with open("data.json", "w") as datei:
-                json.dump(self.data, datei)
-            print("API geladen",self.data)
+            with open("data.json", "w") as file:
+                json.dump(self.data, file)
+            print("API loaded",self.data)
         except Exception as e:
-            print(f"API-Fehler: {e} ")
+            print(f"API error: {e}")
         finally:
             if on_update:
                 on_update()
@@ -88,4 +88,4 @@ class Weather:
             return "snow"
         elif self.data["current"]["weather_code"] in [95, 96, 99]:
             return "thunder"
-        else: return "unbekannt"
+        else: return "unknown"
