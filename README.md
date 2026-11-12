@@ -1,4 +1,4 @@
-# I'm Not Cloudy Anymore ☀️
+# I'm Not Cloudy Anymore
 
 A lightweight desktop weather widget built with **Python** and **PyQt6**. It detects the user's location automatically and displays the current weather with animated pixel-art sprites in a transparent, frameless window.
 
@@ -51,36 +51,6 @@ ImNotCloudyAnymore/
 ├── sprite/            # Animated GIF sprites
 ├── requirements.txt   # Python dependencies
 └── .env               # Local configuration (not included in the repo)
-```
-
-## Getting Started
-
-**Requirements:** Python 3 on Windows
-
-```bash
-# Clone the repository
-git clone https://github.com/josie-dreybrodt/ImNotCloudyAnymore.git
-cd ImNotCloudyAnymore
-
-# Create and activate a virtual environment
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-Create a `.env` file in the project folder:
-
-```
-WEATHER_API_KEY=https://api.open-meteo.com/v1/forecast
-IP_API_KEY=https://ipwho.is/
-```
-
-Run the app:
-
-```bash
-python Main.py
 ```
 
 ## Roadmap
