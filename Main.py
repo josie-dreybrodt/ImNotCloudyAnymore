@@ -89,24 +89,3 @@ class Weather:
         elif self.data["current"]["weather_code"] in [95, 96, 99]:
             return "thunder"
         else: return "unbekannt"
-
-#w= Weather()
-#print(w.weather_code())
-# try:
-#     self.data = requests.get(self.url_weather, params=self.params,timeout=5).json()
-#     with open("data.json", "w") as datei:
-#         json.dump(self.data, datei)
-#         print(self.data)
-#     return self.data
-# except:
-#     try:
-#         with open("data.json", "r") as datei:
-#             self.data = json.load(datei)
-#     except FileNotFoundError:
-#         self.data = {
-#             "current": {
-#                 "temperature_2m": 18.5,
-#                 "weather_code": 61
-#             }
-#         }
-#
